@@ -7,6 +7,10 @@
 
 // Variável que armazena o tempo de início do processo
 time_t starttime;
+time_t nascF1;
+time_t nascF2;
+time_t nascN1;
+time_t nascN2;
 
 // Essa função printa a data.
 void timestamp(){
@@ -17,11 +21,14 @@ void timestamp(){
 
 // Essa função diz o tempo de execução do processo. 
 void execTime(){
+	//printf("Data de nascimento: %d \n", ntime.tm_sec);
+
 	time_t ltime;
 	ltime = time(NULL);
+	//printf("Data de morte:\n");
 	timestamp();
 	double x = difftime(ltime, starttime);
-	printf("Anos passados: %.0f\n\n", x);
+	printf("Anos desde o início: %.0f\n\n", x);
 }
 
 // Retorna o tempo de execução.
@@ -42,7 +49,8 @@ int main(){
 	sleep(14); // Esperar 14 segundos pra o filho nascer
 	printf("PAI %d: Criando o primeiro Filho\n", getpid());
 	printf("Filho 1 Nasceu! Data de Nascimento:\n");
-	execTime();
+	nascF1 = time(NULL);
+	timestamp();
 	pid[0] = fork();
 
 	if(pid[0] < 0){
@@ -60,7 +68,8 @@ int main(){
 		sleep(2);
 		printf("PAI %d: Criando o segundo filho\n", getpid());
 		printf("Filho 2 Nasceu! Data de Nascimento:\n");
-		execTime();
+		nascF2 = time(NULL);
+		timestamp();
 		pid[1] = fork();
 		
 		if(pid[1] < 0){
@@ -78,7 +87,8 @@ int main(){
 		sleep(12);
 		printf("FILHO1 %d: Criando o primeiro neto\n", getpid());
 		printf("Neto 1 Nasceu! Data de Nascimento:\n");
-		execTime();
+		nascN1 = time(NULL);
+		timestamp();
 		pid[2] = fork();
 
 		if(pid[2] < 0){
@@ -97,7 +107,8 @@ int main(){
 		sleep(14);
 		printf("FILHO2 %d: Criando o segundo neto\n", getpid());
 		printf("Neto 2 Nasceu! Data de Nascimento:\n");
-		execTime();
+		nascN2 = time(NULL);
+		timestamp();
 		pid[3] = fork();
 
 		if(pid[3] < 0){
@@ -111,6 +122,13 @@ int main(){
 	}
 
 	// Após ter os filhos, os processos esperam pela morte.
+	if(pid[3] == 0){
+		sleep(18);
+		printf("Processo Neto 2(%d) morre \n", getpid());
+		execTime();
+		exit(0);
+	}
+
 	if(pid[1] == 0){
 		sleep(16);
 		exit(0);
@@ -122,30 +140,29 @@ int main(){
 		exit(0);
 	}
 	
-	if(pid[3] == 0){
-		sleep(18);
-		exit(0);
-	}
-	
 	// Depois do Neto 1 morrer, Filho 1 para de esperar, anuncia a morte do Neto 1 e espera sua morte.
-	if((pid[0] == 0) || (pid[1] ==0)){
-		if(pid[0] == 0){
-			status = wait(NULL);
-			printf("Processo %d morre \n", status);
-			execTime();
-			sleep(6);
-			exit(0);
-		}
+	if(pid[0] == 0){
+		status = wait(NULL);
+		printf("Processo Neto 1(%d) morre \n", status);
+		execTime();
+		sleep(6);
+		exit(0);
 	}else{
 		// Aqui o PAI espera os filhos morrerem
 		status = wait(NULL);
-		printf("Processo %d morre \n", status);
+		printf("Processo Filho 1(%d) morre \n", status);
 		execTime();
 	}
 	// Anuncia a morte final.
+
 	status = wait(NULL);
-	printf("Processo %d morre \n", status);
-	execTime(0);
+	printf("Processo Filho 2(%d) morre \n", status);
+	execTime();
+	
+
+	sleep(14);
+	printf("Processo PAI(%d) morre \n", getpid());
+	execTime();
 
 	return 0;
 
